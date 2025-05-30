@@ -134,12 +134,16 @@ namespace UnityMCP.Editor
         {
             lock (logBuffer)
             {
-                var logs = logBuffer.ToArray()
-                    .Where(log => types == null || types.Contains(log.Type))
-                    .TakeLast(count)
+                var filteredLogs = logBuffer.ToArray()
+                    .Where(log => types == null || types.Contains(log.Type));
+#if UNITY_2021_1_OR_NEWER
+                filteredLogs = filteredLogs.TakeLast(count);
+#else
+                filteredLogs = filteredLogs.Reverse().Take(count).Reverse();
+#endif
+                return filteredLogs
                     .Select(log => $"[{log.Timestamp:yyyy-MM-dd HH:mm:ss}] [{log.Type}] {log.Message}")
                     .ToArray();
-                return logs;
             }
         }
 
@@ -163,9 +167,16 @@ namespace UnityMCP.Editor
                 webSocket.Options.KeepAliveInterval = TimeSpan.FromSeconds(30);
                 
                 var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+#if UNITY_2020_1_OR_NEWER
                 using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeout.Token);
                 
                 await webSocket.ConnectAsync(serverUri, linkedCts.Token);
+#else
+                using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token, timeout.Token))
+                {
+                    await webSocket.ConnectAsync(serverUri, linkedCts.Token);
+                }
+#endif
                 isConnected = true;
                 Debug.Log("[UnityMCP] Successfully connected to MCP Server");
                 StartReceiving();
@@ -403,8 +414,11 @@ try
                 var activeGameObjects = new List<string>();
                 var selectedObjects = new List<string>();
 
-                // Use FindObjectsByType instead of FindObjectsOfType
+#if UNITY_2020_1_OR_NEWER
                 var foundObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
+#else
+                var foundObjects = GameObject.FindObjectsOfType<GameObject>();
+#endif
                 if (foundObjects != null)
                 {
                     foreach (var obj in foundObjects)
