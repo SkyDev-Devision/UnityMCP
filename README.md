@@ -66,7 +66,7 @@ npx -y @smithery/cli install @Arodoid/unitymcp --client claude
 ```
 
 ### Prerequisites
-- Unity 2022.3 or later
+- Unity 2019.4 or later
 - Node.js 18 or later
 - npm 9 or later
 
