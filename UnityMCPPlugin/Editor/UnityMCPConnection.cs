@@ -414,7 +414,7 @@ try
                 var activeGameObjects = new List<string>();
                 var selectedObjects = new List<string>();
 
-#if UNITY_2020_1_OR_NEWER
+#if UNITY_2022_2_OR_NEWER
                 var foundObjects = GameObject.FindObjectsByType<GameObject>(FindObjectsSortMode.None);
 #else
                 var foundObjects = GameObject.FindObjectsOfType<GameObject>();
